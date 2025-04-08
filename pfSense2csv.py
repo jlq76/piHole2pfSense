@@ -44,4 +44,4 @@ with open(output_file, "w", newline="") as csvfile:
     writer.writerows(rows)  
 
 # Print the number of exported static mappings to the console
-print(f"Exported {len(rows)} static mappings to staticmaps.csv")
+print(f"Exported {len(rows)} static mappings to {output_file}")
