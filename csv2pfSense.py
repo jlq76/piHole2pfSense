@@ -50,7 +50,7 @@ if args.overwrite:
                 interface.remove(sm)
             print(f"Removed existing staticmaps for {interface.tag}")
 
-# Add or update staticmap entries for interfaces specified in the CSV
+# Add or update staticmap only for entries for interfaces specified in the CSV
 for interface in root:
     if interface.tag in csv_data:
         # Collect existing staticmap elements and their MAC addresses for the interface
@@ -59,7 +59,7 @@ for interface in root:
         for row in csv_data[interface.tag]:
             mac = row.get("mac", "")
             
-            # Check if staticmap with this MAC exists
+            # Check if staticmap with this MAC already exists
             if mac in existing_staticmaps:
                 # Update the existing staticmap
                 sm = existing_staticmaps[mac]
@@ -98,7 +98,7 @@ for interface in root:
                 print(f"Added new staticmap with MAC {mac} ({row.get('hostname')}) to interface {interface.tag}")
 
 
-# Convert to pretty XML
+# Make it human readable
 rough_string = ET.tostring(root, encoding="unicode")
 parsed = minidom.parseString(rough_string)
 pretty_xml = parsed.toprettyxml(indent="\t")
@@ -124,4 +124,4 @@ pretty_xml = "\n".join(line for line in pretty_xml.splitlines() if not line.stri
 with open(args.output_xml, "w", newline="\n") as f:
     f.write(pretty_xml)
 
-print(f"✅ Updated config written to {args.output_xml}")
+print(f"Updated config written to {args.output_xml}")
