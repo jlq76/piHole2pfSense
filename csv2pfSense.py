@@ -81,6 +81,17 @@ for interface in root:
                         sm.remove(arp_tag_elem)
                         print(f"Removed <arp_table_static_entry> for MAC {mac} ({row.get('hostname')}) in interface {interface.tag}")
 
+                # Handle <dnsserver> entries 
+                for dns_elem in sm.findall("dnsserver"):
+                    sm.remove(dns_elem)
+
+                dns_entries = row.get("dnsservers", "").strip()
+                if dns_entries:
+                    for dns in dns_entries.split("|"):
+                        dns = dns.strip()
+                        if dns:
+                            ET.SubElement(sm, "dnsserver").text = dns
+
                 print(f"Updated staticmap with MAC {mac} ({row.get('hostname')}) for interface {interface.tag}")
             else:
                 # Add a new staticmap for this MAC
@@ -94,6 +105,14 @@ for interface in root:
                 if arp_entry == "x":
                     ET.SubElement(sm, "arp_table_static_entry").text = "x"
                     print(f"Added <arp_table_static_entry> for MAC {mac} ({row.get('hostname')}) to interface {interface.tag}")
+
+                # Handle <dnsserver> entries
+                dns_entries = row.get("dnsservers", "").strip()
+                if dns_entries:
+                    for dns in dns_entries.split("|"):
+                        dns = dns.strip()
+                        if dns:
+                            ET.SubElement(sm, "dnsserver").text = dns
 
                 print(f"Added new staticmap with MAC {mac} ({row.get('hostname')}) to interface {interface.tag}")
 

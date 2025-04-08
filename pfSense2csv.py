@@ -24,8 +24,13 @@ rows = []
 for interface in root:  
     if interface.tag.startswith("lan") or interface.tag.startswith("opt"):
         for staticmap in interface.findall("staticmap"):
-            #arp_table_static_entry is present only if ARP mapping is checked in pfSense
+            # Check for ARP static entry presence
             arp_table_static_entry = staticmap.find("arp_table_static_entry") is not None
+
+            # Collect all <dnsserver> entries
+            dnsservers = [dns.text for dns in staticmap.findall("dnsserver") if dns.text]
+            dnsservers_csv = "|".join(dnsservers)
+
             row = {
                 "interface": interface.tag,  
                 "mac": staticmap.findtext("mac", ""),  
@@ -33,15 +38,18 @@ for interface in root:
                 "ipaddr": staticmap.findtext("ipaddr", ""),
                 "hostname": staticmap.findtext("hostname", ""), 
                 "descr": staticmap.findtext("descr", ""),  
-                "arp_table_static_entry": "x" if arp_table_static_entry else ""
+                "arp_table_static_entry": "x" if arp_table_static_entry else "",
+                "dnsservers": dnsservers_csv
             }
             rows.append(row)
 
-# Write the CSV file
+# Write the CSV file with the new field included
 with open(output_file, "w", newline="") as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=["interface", "mac", "cid", "ipaddr", "hostname", "descr", "arp_table_static_entry"])
+    writer = csv.DictWriter(csvfile, fieldnames=[
+        "interface", "mac", "cid", "ipaddr", "hostname", "descr", "arp_table_static_entry", "dnsservers"
+    ])
     writer.writeheader()  
-    writer.writerows(rows)  
+    writer.writerows(rows)
 
 # Print the number of exported static mappings to the console
 print(f"Exported {len(rows)} static mappings to {output_file}")
